@@ -13,7 +13,12 @@ typedef struct Alloc_chunk{
     struct Alloc_chunk* next;
 }alloc_chunk;
 
-void* heap_alloc(size_t size);
+int set_chunk_size (alloc_chunk* chnk, size_t size);
+int set_datatype (alloc_chunk* chnk, datatype type);
+int set_refstate (alloc_chunk* chnk);
+
+void* heap_alloc(size_t size, datatype type);
+int heap_dealloc(alloc_chunk* chnk);
 
 
 #endif
