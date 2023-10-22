@@ -48,5 +48,6 @@ int main(void){
     pthread_join(worker, NULL);
     pthread_join(gc, NULL);
 
+    free(worker_stackaddr);
     return 0;
 }

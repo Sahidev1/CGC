@@ -12,7 +12,7 @@ int main_gc(void){
     //printf("val: %d\n", val);
     printf("stack addr: %p\n", &val);
 
-    int arr_size = 5*1000;
+    int arr_size = 750*1000*1000;
     int* arr = heap_alloc(sizeof(int)*arr_size, VALUE);
 
     void* hptr = ((void*) arr) - ALLOC_OVERHEAD;
@@ -28,9 +28,9 @@ int main_gc(void){
     carr[arr_size % 233] = 'p';
     long* vals = heap_alloc(sizeof(long)*arr_size, REFERENCE);
 
-    for(int i = 0; i < arr_size; i++){
+    /*for(int i = 0; i < arr_size; i++){
         arr[i] = rand()%48183;
-    }
+    }*/
 
 
 
@@ -41,7 +41,14 @@ int main_gc(void){
 
     sleep(2);
     ptr = NULL;
-    sleep(1);
+    carr = NULL;
+    sleep(5);
+    arr = NULL;
+    sleep(5);
+    vals = NULL;
+    sleep(5);
+
+     
     //heap_dealloc((alloc_chunk*) hptr);
 
    // printf("Dealloced\n");

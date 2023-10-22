@@ -76,7 +76,7 @@ static int set_signature(alloc_chunk* chnk){
  * chnk points to an allocated heap chunk on the linked list. 
 */
 int heap_dealloc(alloc_chunk* chnk){
-    printf("dealloc addr: %p\n", chnk);
+    //printf("dealloc addr: %p\n", chnk);
 
     pthread_mutex_lock(&heap_lock);
 
@@ -184,7 +184,7 @@ static int sweep(){
 int GC(void* stack_ptr, void* stack_end){
     pthread_mutex_lock(&GC_lock);
     mark(stack_ptr, stack_end);
-    chunk_iterator();
+    //chunk_iterator();
     sweep();
     pthread_mutex_unlock(&GC_lock);
     return 0;
