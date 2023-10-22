@@ -1,5 +1,10 @@
 #include "threadctrl.h"
 #include <stdlib.h>
+#include <time.h>
+
+void sleep_nanos(int nanos){
+    
+}
 
 void* worker_fun(void* arg){
     shared_args *const wargs = (shared_args*) arg;
@@ -9,6 +14,7 @@ void* worker_fun(void* arg){
 }
 
 void* gc_procedure(void* arg){
+
 
     return NULL;
 }
