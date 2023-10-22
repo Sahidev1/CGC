@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #define ALLOC_OVERHEAD sizeof(alloc_chunk)
+#define SIGNATURE 13271 // arbitrary signature between 0 - 2^14
 
 typedef enum{REFERENCE,VALUE}datatype;
 typedef enum{UNMARKED, MARKED}refstate;
@@ -22,5 +25,8 @@ int set_refstate (alloc_chunk* chnk, refstate set_state);
 void* heap_alloc(size_t size, datatype type);
 int heap_dealloc(alloc_chunk* chnk);
 
+void initialize_locks();
+int GC(void* stack_ptr, void* stack_end);
+void chunk_iterator ();
 
 #endif

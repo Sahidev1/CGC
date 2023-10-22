@@ -1,12 +1,11 @@
 #define GNU_SOURCE
 #include "threadctrl.h"
 #include <pthread.h>
-#include <stdlib.h>
 #include <string.h>
 #include "heap_manager.h"
 
 #define STACK_SIZE (8*4000)
-#define STACK_NOTUSED (0xff)
+#define STACK_NOTUSED (0x0)
 #define SWITCH_INIT (0x0)
 
 int main_gc(void);
@@ -31,7 +30,7 @@ int main(void){
     worker_stackaddr = malloc(STACK_SIZE);
     memset(worker_stackaddr, STACK_NOTUSED, STACK_SIZE);
 
-
+    initialize_locks();
 
     /**
      * We initialize the worker thread attributes. Attributes includes
@@ -40,9 +39,14 @@ int main(void){
     pthread_attr_init(&worker_attr);
     pthread_attr_setstack(&worker_attr, worker_stackaddr, STACK_SIZE);
 
+    wargs->worker_stackaddr = worker_stackaddr;
+    wargs->stack_size = STACK_SIZE;
+
     pthread_create(&worker, &worker_attr, &worker_fun, wargs);
+    pthread_create(&gc, NULL, &gc_procedure, wargs);
 
     pthread_join(worker, NULL);
+    pthread_join(gc, NULL);
 
     return 0;
 }
