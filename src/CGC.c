@@ -2,21 +2,13 @@
 #include "CGC.h"
 #include "threadctrl.h"
 
-#define STACK_SIZE (8*4000)
+#define STACK_SIZE (8*4096) // About 64kilobytes of stack space. 
 #define STACK_NOTUSED (0x0)
 #define SWITCH_INIT (0x0)
 
-//int main_gc(void);
-
-/*shared_args warg = {
-    .main_gc_ptr = &main_gc,
-    .is_working=TRUE
-};
-shared_args *const wargs = &warg;
+/**
+ * This function should be called from main with address of the function that the worker thread should run.
 */
-
-
-
 int runner(shared_args* wargs){
     pthread_t worker, gc;
     pthread_attr_t worker_attr;

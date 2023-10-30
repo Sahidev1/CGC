@@ -3,11 +3,16 @@
 
 #include <stdio.h> // for debugging
 
-static int sleep_nanos(long nanos){
-    struct timespec req={.tv_sec=0, .tv_nsec=nanos};
+/**
+ * makes thread sleep for certain nanoseconds
+*/
+static int sleep_nanos(struct timespec req){
     return nanosleep(&req, NULL);
 }
 
+/**
+ * This is the worker function for the worker thread
+*/
 void* worker_fun(void* arg){
     shared_args *const wargs = (shared_args*) arg;
 
@@ -17,14 +22,19 @@ void* worker_fun(void* arg){
     return NULL;
 }
 
+/**
+ * This the garbage procedure for the garbage collector thread
+*/
 void* gc_procedure(void* arg){
     long sleep = 1000;
+    struct timespec req={.tv_sec=0, .tv_nsec=sleep};
+
     shared_args *const wargs = (shared_args*) arg;
     void* stack_ptr = wargs->worker_stackaddr + wargs->stack_size;
     int iter = 0;
     while(wargs->is_working){
         GC(stack_ptr, wargs->worker_stackaddr);
-        sleep_nanos(sleep);        
+        sleep_nanos(req);        
     }
     GC(stack_ptr, wargs->worker_stackaddr);
     printf("GC Done\n");

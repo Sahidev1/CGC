@@ -37,6 +37,9 @@ static int set_datatype (alloc_chunk* chnk, datatype type){
     return 0;
 }
 
+/**
+ * returns datatype of an alloc_chunk
+*/
 static datatype get_datatype(alloc_chunk* chnk){
     return chnk->info&(~DATATYPE_BITMASK);
 }
@@ -52,7 +55,10 @@ static int set_refstate (alloc_chunk* chnk, refstate set_state){
     return 0;
 }
 
-refstate get_refstate(alloc_chunk* chnk){
+/**
+ * This function returs the reference state of the heap chunk.
+*/
+static int get_refstate(alloc_chunk* chnk){
     return (chnk->info&(~REFSET_BITMASK))>>1;
 }
 
@@ -98,8 +104,11 @@ static int heap_dealloc(alloc_chunk* chnk){
     return 0;
 }
 
+/**
+ * This function takes an address and sees if it points to any chunks in the alloc_chunk linked list, if it does the alloc chunk gets marked.
+ * Then the function goes through the alloc chunks data_segment to see if there is any potential heap pointers there by recursively calling this function again.
+*/
 static int search_and_mark(void* pot_heapaddr){
-    //sleep(2);
     alloc_chunk* iter = first;
     
     while(iter != NULL){
@@ -112,15 +121,12 @@ static int search_and_mark(void* pot_heapaddr){
     
 
     if(iter != NULL){
-     //   printf ("datatype: %d\n", (int) get_datatype(iter));
-       // printf ("get chunk size: %d\n", (int) get_chunk_size(iter));
         void* heap_ptr = ((void*) iter) + ALLOC_OVERHEAD;
         void* end = heap_ptr + get_chunk_size(iter);
         void* derefed;
         int word_incr = 8;
         while (heap_ptr <= end){
             derefed = (void*) *((int64_t*) heap_ptr);
-            //printf("heap_ptr: %p, derefed: %p\n", heap_ptr, derefed);
             if(derefed != NULL)search_and_mark(derefed);
             heap_ptr += word_incr;
         }
@@ -129,6 +135,9 @@ static int search_and_mark(void* pot_heapaddr){
     return 0;
 }
 
+/**
+ * This function clears all alloc_chunks reference state to unmarked. 
+*/
 static int clear_marks(){
     alloc_chunk* iter = first;
     while(iter != NULL){
@@ -139,13 +148,17 @@ static int clear_marks(){
     return 0;
 }
 
+/**
+ * The mark phase starting from the stack, we travel through the stack space in 8 byte increments, and for each non NULL 
+ * 8 byte value we call the function search_and_mark
+*/
 static int mark(void* stack_ptr, void* stack_end){
     clear_marks();
     int void_decr = 8;
 
     void* pot_ptr;
     while(stack_ptr > stack_end){
-        pot_ptr = (void*) *((int64_t*) stack_ptr);
+        pot_ptr = (void*) *((int64_t*) stack_ptr); // extracting 8 byte value at stack address and casting it to a void pointer.
         if (pot_ptr != (void*) 0){
             search_and_mark(pot_ptr);
         }
@@ -167,6 +180,9 @@ void chunk_iterator (){
     }
 } 
 
+/**
+ * This function sweeps clean all unmarked(unreachable from the stack) chunks, freeing memory.
+*/
 static int sweep(){
     alloc_chunk* iter = first;
     alloc_chunk* next;
@@ -181,10 +197,12 @@ static int sweep(){
     return 0;
 }
 
+/**
+ * Garbage collection function that performs a mark and sweep
+*/
 int GC(void* stack_ptr, void* stack_end){
     pthread_mutex_lock(&GC_lock);
     mark(stack_ptr, stack_end);
-    //chunk_iterator();
     sweep();
     pthread_mutex_unlock(&GC_lock);
     return 0;
@@ -235,14 +253,23 @@ static void* heap_alloc(size_t size, datatype type){
     return ((void*) chnk) + ALLOC_OVERHEAD; 
 }
 
+/**
+ * The function users should call to allocate conservatively
+*/
 void* GC_alloc (size_t size){
     return heap_alloc(size, REFERENCE);
 }
 
+/**
+ * The function users should call to allocate precisely.
+*/
 void* GC_palloc (size_t size, datatype type){
     return heap_alloc(size, type);
 }
 
+/**
+ * Function that initializes the mutex locks
+*/
 void initialize_locks(){
     pthread_mutex_init(&heap_lock, NULL);
     pthread_mutex_init(&GC_lock, NULL);
