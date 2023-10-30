@@ -1,21 +1,25 @@
 #include <stdio.h>
-#include "heap_manager.h"
+
 #include <unistd.h>
+#include "CGC.h"
+
 
 void square(int val, int* ret){
     *ret = val*val;
 }
 
 int main_gc(void){
+    printf("10 seconds before test start\n");
+    sleep(10);
     int val = 11;
     square(val, &val);
     //printf("val: %d\n", val);
     printf("stack addr: %p\n", &val);
 
     int arr_size = 750*1000*1000;
-    int* arr = heap_alloc(sizeof(int)*arr_size, VALUE);
+    int* arr = GC_palloc(sizeof(int)*arr_size, VALUE);
 
-    void* hptr = ((void*) arr) - ALLOC_OVERHEAD;
+    //void* hptr = ((void*) arr) - ALLOC_OVERHEAD;
    /*printf("ptr addr: %p / %p, info val: %p\n", hptr, 
         arr, (void*)((alloc_chunk*) hptr)->info);*/
         
@@ -24,19 +28,17 @@ int main_gc(void){
     }*/
   
     
-    char* carr = heap_alloc(sizeof(char)*arr_size, VALUE);
+    char* carr = GC_palloc(sizeof(char)*arr_size, VALUE);
     carr[arr_size % 233] = 'p';
-    long* vals = heap_alloc(sizeof(long)*arr_size, REFERENCE);
+    long* vals = GC_palloc(sizeof(long)*arr_size, REFERENCE);
 
     /*for(int i = 0; i < arr_size; i++){
         arr[i] = rand()%48183;
     }*/
 
 
-
-
-    int** ptr = heap_alloc(sizeof(int**), REFERENCE);
-    *ptr = heap_alloc(sizeof(int), VALUE);
+    int** ptr = GC_palloc(sizeof(int**), REFERENCE);
+    *ptr = GC_palloc(sizeof(int), VALUE);
     *(*ptr) = 124;
 
     sleep(2);
@@ -46,7 +48,7 @@ int main_gc(void){
     arr = NULL;
     sleep(5);
     vals = NULL;
-    sleep(5);
+    sleep(15);
 
      
     //heap_dealloc((alloc_chunk*) hptr);
@@ -55,7 +57,16 @@ int main_gc(void){
     //sleep(5);
     //heap_dealloc((alloc_chunk*) ((void*) carr - ALLOC_OVERHEAD));
     //heap_dealloc((alloc_chunk*) ((void*) vals - ALLOC_OVERHEAD));
-   
+    return 0;
+}
+
+int main(void){
+    shared_args warg = {
+        .main_gc_ptr = &main_gc,
+        .is_working=TRUE
+    };
+    shared_args *const wargs = &warg;
+    runner(wargs);   
 
     return 0;
 }

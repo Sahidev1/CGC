@@ -1,8 +1,9 @@
 #include "threadctrl.h"
+#include "shared_struct.h"
 
 #include <stdio.h> // for debugging
 
-int sleep_nanos(long nanos){
+static int sleep_nanos(long nanos){
     struct timespec req={.tv_sec=0, .tv_nsec=nanos};
     return nanosleep(&req, NULL);
 }

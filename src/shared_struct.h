@@ -1,9 +1,7 @@
-#ifndef THREADCTRL_H
-#define THREADCTRL_H
+#ifndef SHARED_STRUCT_H
+#define SHARED_STRUCT_H
 
 #include <stdlib.h>
-#include <time.h>
-#include "heap_manager.h"
 
 typedef enum {FALSE, TRUE}boolean;
 
@@ -13,9 +11,5 @@ typedef struct Shared_args{
     void* worker_stackaddr;
     size_t stack_size;
 }shared_args;
-
-
-void* worker_fun(void* arg);
-void* gc_procedure(void* arg);
 
 #endif

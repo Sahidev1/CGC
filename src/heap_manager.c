@@ -15,7 +15,7 @@ pthread_mutex_t GC_lock;
 /**
  * We encode the size of the allocation on the info field as a 2^48 bit value.
 */
-int set_chunk_size (alloc_chunk* chnk, size_t size){
+static int set_chunk_size (alloc_chunk* chnk, size_t size){
     size <<= 16;
     chnk->info = chnk->info & SIZE_BITMASK;
     chnk->info = chnk->info | (int64_t)size;
@@ -23,21 +23,21 @@ int set_chunk_size (alloc_chunk* chnk, size_t size){
     return 0;
 }
 
-size_t get_chunk_size (alloc_chunk* chnk){
+static size_t get_chunk_size (alloc_chunk* chnk){
     return (chnk->info&(~SIZE_BITMASK))>>16;
 }
 
 /**
  * We encode datatype of the allocation on the info field as a 1 bit flag.
 */
-int set_datatype (alloc_chunk* chnk, datatype type){
+static int set_datatype (alloc_chunk* chnk, datatype type){
     chnk->info = chnk->info & DATATYPE_BITMASK;
     chnk->info = chnk->info | (type & ~DATATYPE_BITMASK);
 
     return 0;
 }
 
-datatype get_datatype(alloc_chunk* chnk){
+static datatype get_datatype(alloc_chunk* chnk){
     return chnk->info&(~DATATYPE_BITMASK);
 }
 
@@ -45,7 +45,7 @@ datatype get_datatype(alloc_chunk* chnk){
  * We use this to set reference state, second least significant bit is set to
  * 0 or 1. 
 */
-int set_refstate (alloc_chunk* chnk, refstate set_state){
+static int set_refstate (alloc_chunk* chnk, refstate set_state){
     chnk->info = chnk->info&REFSET_BITMASK;
     chnk->info = chnk->info|(set_state<<1);
 
@@ -75,7 +75,7 @@ static int set_signature(alloc_chunk* chnk){
  * It is extremely important that it is 100% certain that
  * chnk points to an allocated heap chunk on the linked list. 
 */
-int heap_dealloc(alloc_chunk* chnk){
+static int heap_dealloc(alloc_chunk* chnk){
     //printf("dealloc addr: %p\n", chnk);
 
     pthread_mutex_lock(&heap_lock);
@@ -200,7 +200,7 @@ int GC(void* stack_ptr, void* stack_end){
  * Then we add the allocated chunk to the linked list
  * of allocated chunks.
 */
-void* heap_alloc(size_t size, datatype type){
+static void* heap_alloc(size_t size, datatype type){
     pthread_mutex_lock(&GC_lock);
     pthread_mutex_lock(&heap_lock);
 
@@ -235,7 +235,13 @@ void* heap_alloc(size_t size, datatype type){
     return ((void*) chnk) + ALLOC_OVERHEAD; 
 }
 
+void* GC_alloc (size_t size){
+    return heap_alloc(size, REFERENCE);
+}
 
+void* GC_palloc (size_t size, datatype type){
+    return heap_alloc(size, type);
+}
 
 void initialize_locks(){
     pthread_mutex_init(&heap_lock, NULL);

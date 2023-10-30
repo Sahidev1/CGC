@@ -1,22 +1,23 @@
-#define GNU_SOURCE
+
+#include "CGC.h"
 #include "threadctrl.h"
-#include <pthread.h>
-#include <string.h>
-#include "heap_manager.h"
 
 #define STACK_SIZE (8*4000)
 #define STACK_NOTUSED (0x0)
 #define SWITCH_INIT (0x0)
 
-int main_gc(void);
+//int main_gc(void);
 
-shared_args warg = {
+/*shared_args warg = {
     .main_gc_ptr = &main_gc,
     .is_working=TRUE
 };
 shared_args *const wargs = &warg;
+*/
 
-int main(void){
+
+
+int runner(shared_args* wargs){
     pthread_t worker, gc;
     pthread_attr_t worker_attr;
     void* worker_stackaddr;
