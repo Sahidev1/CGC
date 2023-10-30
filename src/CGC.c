@@ -41,6 +41,8 @@ int runner(shared_args* wargs){
     pthread_join(worker, NULL);
     pthread_join(gc, NULL);
 
+    destroy_locks();
+
     free(worker_stackaddr);
     return 0;
 }

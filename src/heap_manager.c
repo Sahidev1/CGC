@@ -274,3 +274,11 @@ void initialize_locks(){
     pthread_mutex_init(&heap_lock, NULL);
     pthread_mutex_init(&GC_lock, NULL);
 }
+
+/**
+ * destroy mutex locks
+*/
+void destroy_locks(){
+    pthread_mutex_destroy(&heap_lock);
+    pthread_mutex_destroy(&GC_lock);
+}

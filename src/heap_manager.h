@@ -23,6 +23,8 @@ void* GC_palloc (size_t size, datatype type);
 
 
 void initialize_locks();
+void destroy_locks();
+
 int GC(void* stack_ptr, void* stack_end);
 void chunk_iterator ();
 
