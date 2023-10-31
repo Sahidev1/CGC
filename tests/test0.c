@@ -11,13 +11,16 @@ void square(int val, int* ret){
 int main_gc(void){
     printf("10 seconds before test start\n");
     sleep(10);
+
+    start_autoGC();
+
     int val = 11;
     square(val, &val);
     //printf("val: %d\n", val);
     printf("stack addr: %p\n", &val);
 
     int arr_size = 750*1000*1000;
-    int* arr = GC_palloc(sizeof(int)*arr_size, VALUE);
+    int* arr = palloc(sizeof(int)*arr_size, REFERENCE);
 
     //void* hptr = ((void*) arr) - ALLOC_OVERHEAD;
    /*printf("ptr addr: %p / %p, info val: %p\n", hptr, 
@@ -28,17 +31,17 @@ int main_gc(void){
     }*/
   
     
-    char* carr = GC_palloc(sizeof(char)*arr_size, VALUE);
+    char* carr = palloc(sizeof(char)*arr_size, REFERENCE);
     carr[arr_size % 233] = 'p';
-    long* vals = GC_palloc(sizeof(long)*arr_size, REFERENCE);
+    long* vals = palloc(sizeof(long)*arr_size, REFERENCE);
 
     /*for(int i = 0; i < arr_size; i++){
         arr[i] = rand()%48183;
     }*/
 
 
-    int** ptr = GC_palloc(sizeof(int**), REFERENCE);
-    *ptr = GC_palloc(sizeof(int), VALUE);
+    int** ptr = palloc(sizeof(int**), REFERENCE);
+    *ptr = palloc(sizeof(int), REFERENCE);
     *(*ptr) = 124;
 
     sleep(2);
@@ -48,7 +51,8 @@ int main_gc(void){
     arr = NULL;
     sleep(5);
     vals = NULL;
-    sleep(15);
+    sleep(10);
+    stop_autoGC();
 
      
     //heap_dealloc((alloc_chunk*) hptr);

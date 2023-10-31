@@ -24,19 +24,21 @@ void* worker_fun(void* arg){
 
 /**
  * This the garbage procedure for the garbage collector thread
+ * 
+ * this is a bit dodgy
 */
 void* gc_procedure(void* arg){
-    long sleep = 1000;
-    struct timespec req={.tv_sec=0, .tv_nsec=sleep};
+    long sleep_time_nanos = 1000 * 100; // 100 ns
+    struct timespec req={.tv_sec=0, .tv_nsec=sleep_time_nanos};
 
     shared_args *const wargs = (shared_args*) arg;
     void* stack_ptr = wargs->worker_stackaddr + wargs->stack_size;
     int iter = 0;
-    while(wargs->is_working){
+    while(wargs->is_working && wargs->run_GC){
         GC(stack_ptr, wargs->worker_stackaddr);
         sleep_nanos(req);        
     }
-    GC(stack_ptr, wargs->worker_stackaddr);
+    //GC(stack_ptr, wargs->worker_stackaddr);
     printf("GC Done\n");
     return NULL;
 }

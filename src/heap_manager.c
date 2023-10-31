@@ -6,11 +6,27 @@
 #define REFSET_BITMASK (~0x2)
 #define SIGMASK (~0xfffc)
 
+#define GC_TRIGGER_SIZE (1<<16)
+
 alloc_chunk* first;
+alloc_chunk* tail;
 
 pthread_mutex_t heap_lock;
 pthread_mutex_t GC_lock;
 
+static int marker = 0x1; 
+
+typedef enum{STACK_LAYOUT_UNKNOWN, STACK_LAYOUT_KNOWN}stacklayout;
+
+static stacklayout stklay = STACK_LAYOUT_UNKNOWN;
+static void* given_stack_ptr; 
+static void* given_stack_end;
+
+static size_t alloc_buildup = 0;
+
+static int flip_marker(int marker){
+    return (~marker)&(0x1);
+}
 
 /**
  * We encode the size of the allocation on the info field as a 2^48 bit value.
@@ -110,17 +126,19 @@ static int heap_dealloc(alloc_chunk* chnk){
 */
 static int search_and_mark(void* pot_heapaddr){
     alloc_chunk* iter = first;
+    datatype dtype = REFERENCE; 
     
     while(iter != NULL){
         if(((void*)iter) + ALLOC_OVERHEAD == pot_heapaddr){
-            set_refstate(iter, MARKED);
+            set_refstate(iter, marker);
+            dtype = get_datatype(iter);
             break;
         }
         iter = iter->next;
     }
-    
 
-    if(iter != NULL){
+
+    if(iter != NULL && dtype == REFERENCE){
         void* heap_ptr = ((void*) iter) + ALLOC_OVERHEAD;
         void* end = heap_ptr + get_chunk_size(iter);
         void* derefed;
@@ -141,7 +159,7 @@ static int search_and_mark(void* pot_heapaddr){
 static int clear_marks(){
     alloc_chunk* iter = first;
     while(iter != NULL){
-        set_refstate(iter,UNMARKED);
+        set_refstate(iter,flip_marker(marker));
         iter = iter->next;
     }
 
@@ -153,7 +171,7 @@ static int clear_marks(){
  * 8 byte value we call the function search_and_mark
 */
 static int mark(void* stack_ptr, void* stack_end){
-    clear_marks();
+    //clear_marks();
     int void_decr = 8;
 
     void* pot_ptr;
@@ -172,10 +190,12 @@ static int mark(void* stack_ptr, void* stack_end){
 //for debugging
 void chunk_iterator (){
     alloc_chunk* iter = first;
+    int chunk_count=0;
     while(iter != NULL){
         printf("chunck addr: %p\n", iter);
         printf("data type: %d, get refstate: %d, get size: %d\n", (int) get_datatype(iter),
         (int) get_refstate(iter),(int) get_chunk_size(iter));
+        printf("chunk_count: %d\n", ++chunk_count);
         iter = iter->next;
     }
 } 
@@ -189,13 +209,15 @@ static int sweep(){
     while(iter != NULL){
         //printf("refstate: %d\n", (int) get_refstate(iter));
         next = iter->next;
-        if(get_refstate(iter) == UNMARKED){
+        if(get_refstate(iter) != marker){
             heap_dealloc(iter);
         }
         iter = next;
     }
     return 0;
 }
+
+int gc_runs = 0; // remove this for debugging only!
 
 /**
  * Garbage collection function that performs a mark and sweep
@@ -204,11 +226,18 @@ int GC(void* stack_ptr, void* stack_end){
     pthread_mutex_lock(&GC_lock);
     mark(stack_ptr, stack_end);
     sweep();
+    marker = flip_marker(marker);
     pthread_mutex_unlock(&GC_lock);
     return 0;
 }
 
+int set_stack_layout (void* stackptr, void* stackend){
+    stklay = STACK_LAYOUT_KNOWN;
+    given_stack_ptr = stackptr;
+    given_stack_end =  stackend;
 
+    return 0;
+}
 
 /**
  * This function allocates a heap chunk on the heap. 
@@ -224,11 +253,11 @@ static void* heap_alloc(size_t size, datatype type){
 
     int padding = 8 - (size%8);
     padding = padding == 8?0:padding;
-    void* heap_chunk = malloc(size + ALLOC_OVERHEAD + padding);
+    void* heap_chunk = calloc(1,size + ALLOC_OVERHEAD + padding);
     alloc_chunk* chnk = (alloc_chunk*) heap_chunk;
     set_chunk_size(chnk, size);
     set_datatype(chnk, type);
-    set_refstate(chnk, UNMARKED);
+    set_refstate(chnk, flip_marker(marker));
     set_signature(chnk);
     chnk->next = NULL;
 
@@ -240,11 +269,11 @@ static void* heap_alloc(size_t size, datatype type){
     if (first == NULL){
         first = chnk;
         chnk->prev = NULL;
+        tail = first;
     } else {
-        alloc_chunk* iter = first; 
-        while(iter->next != NULL) iter = iter->next;
-        chnk->prev = iter;
-        iter->next = chnk;
+        tail->next = chnk;
+        chnk->prev = tail;
+        tail = tail->next;
     }
 
     pthread_mutex_unlock(&heap_lock);
@@ -253,18 +282,46 @@ static void* heap_alloc(size_t size, datatype type){
     return ((void*) chnk) + ALLOC_OVERHEAD; 
 }
 
+static int inner_GC_call(){
+    if (stklay == STACK_LAYOUT_UNKNOWN) return 1;
+
+    if(alloc_buildup > (size_t) GC_TRIGGER_SIZE){
+        GC(given_stack_ptr, given_stack_end);
+        alloc_buildup = 0;
+    }
+    return 0;
+}
+
+int runGC (){
+    return inner_GC_call();
+}
+
 /**
  * The function users should call to allocate conservatively
 */
-void* GC_alloc (size_t size){
+void* alloc (size_t size){
+    alloc_buildup += size;
     return heap_alloc(size, REFERENCE);
 }
 
 /**
  * The function users should call to allocate precisely.
 */
-void* GC_palloc (size_t size, datatype type){
+void* palloc (size_t size, datatype type){
+    alloc_buildup += size;
     return heap_alloc(size, type);
+}
+
+void* GC_palloc (size_t size, datatype type){
+    alloc_buildup += size;
+    inner_GC_call();
+    return heap_alloc(size, type);
+}
+
+void* GC_alloc (size_t size){
+    alloc_buildup += size;
+    inner_GC_call();
+    return heap_alloc(size, REFERENCE);
 }
 
 /**

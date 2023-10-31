@@ -2,15 +2,30 @@
 #include "CGC.h"
 #include "threadctrl.h"
 
-#define STACK_SIZE (8*4096) // About 64kilobytes of stack space. 
+#define STACK_SIZE (256*4096) // About 1MB of stack space. 
 #define STACK_NOTUSED (0x0)
 #define SWITCH_INIT (0x0)
+
+static shared_args* wargs;
+static pthread_t gc;
+
+int start_autoGC(){
+    wargs->run_GC = TRUE;
+    return pthread_create(&gc, NULL, &gc_procedure, wargs);
+}
+
+int stop_autoGC(){
+    wargs->run_GC = FALSE;
+    return pthread_detach(gc);
+}
 
 /**
  * This function should be called from main with address of the function that the worker thread should run.
 */
-int runner(shared_args* wargs){
-    pthread_t worker, gc;
+int runner(shared_args* args){
+    wargs = args;
+    wargs->run_GC = FALSE;
+    pthread_t worker;
     pthread_attr_t worker_attr;
     void* worker_stackaddr;
 
@@ -35,11 +50,12 @@ int runner(shared_args* wargs){
     wargs->worker_stackaddr = worker_stackaddr;
     wargs->stack_size = STACK_SIZE;
 
+    set_stack_layout(wargs->worker_stackaddr + wargs->stack_size, 
+    wargs->worker_stackaddr);
+
     pthread_create(&worker, &worker_attr, &worker_fun, wargs);
-    pthread_create(&gc, NULL, &gc_procedure, wargs);
 
     pthread_join(worker, NULL);
-    pthread_join(gc, NULL);
 
     destroy_locks();
 

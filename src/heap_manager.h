@@ -18,15 +18,20 @@ typedef struct Alloc_chunk{
     struct Alloc_chunk* prev;
 }alloc_chunk;
 
-void* GC_alloc (size_t size);
+void* alloc (size_t size);
+void* palloc (size_t size, datatype type);
 void* GC_palloc (size_t size, datatype type);
+void* GC_alloc (size_t size);
 
 
 void initialize_locks();
 void destroy_locks();
 
 int GC(void* stack_ptr, void* stack_end);
+int runGC ();
+
 void chunk_iterator ();
 
+int set_stack_layout (void* stackptr, void* stackend);
 
 #endif

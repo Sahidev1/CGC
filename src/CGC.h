@@ -7,6 +7,8 @@
 #include "shared_struct.h"
 
 
-int runner(shared_args* wargs);
+int runner(shared_args* args);
+int start_autoGC();
+int stop_autoGC();
 
 #endif
