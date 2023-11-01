@@ -106,10 +106,13 @@ static int heap_dealloc(alloc_chunk* chnk){
     alloc_chunk* next = chnk->next;
     if(chnk == first){
         first = first->next;
+
         if(first != NULL)first->prev = NULL;
+        else tail = NULL;
     }
     else if(next == NULL){
         prev->next = NULL;
+        tail = prev;
     } else {
         prev->next = next;
         next->prev = prev;
@@ -130,6 +133,8 @@ static int search_and_mark(void* pot_heapaddr){
     
     while(iter != NULL){
         if(((void*)iter) + ALLOC_OVERHEAD == pot_heapaddr){
+            // If chunk is already marked then we leave. This should prevent being stuck in cyclical references.
+            if (get_refstate(iter) == marker) return 0; 
             set_refstate(iter, marker);
             dtype = get_datatype(iter);
             break;
@@ -171,7 +176,7 @@ static int clear_marks(){
  * 8 byte value we call the function search_and_mark
 */
 static int mark(void* stack_ptr, void* stack_end){
-    //clear_marks();
+    clear_marks();
     int void_decr = 8;
 
     void* pot_ptr;

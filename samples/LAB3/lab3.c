@@ -23,7 +23,7 @@ void print_data (int virtual_address, int physical_address, int stored_value){
 }
 
 int maingc (void){
-    //start_autoGC();
+    start_autoGC();
 
     char* PHYSICAL_MEMORY;
     TBL_hit_count = 0;
@@ -51,13 +51,16 @@ int maingc (void){
     open_disk(&disc);
     init_TBL(tbl_cache);
 
-
     read_buffer = alloc(sizeof(char) * READ_BUFFER_SIZE);
     size_t size = (size_t) READ_BUFFER_SIZE;
     int virtual_address = -1;
     int base_address;
     int physical_address;
     char stored_value; 
+
+    chunk_iterator();
+    print_debug("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+
     while (getline(&read_buffer, &size, fptr) != -1){
         virtual_address = atoi(read_buffer);
         translate_virt_addr(&decoder, virtual_address);
@@ -89,15 +92,14 @@ int maingc (void){
     }
 
     printf("Page fault count: %d, TBL Hitrate: %d\n", page_fault_count, TBL_hit_count);
-
     chunk_iterator();
     list = NULL;
-    runGC();
+    chunk_iterator();
     tbl_cache= NULL;
     PHYSICAL_MEMORY = NULL;
+    chunk_iterator();
     read_buffer=NULL;
-
-    //stop_autoGC();
+    stop_autoGC();
     return 0;
 }
 
