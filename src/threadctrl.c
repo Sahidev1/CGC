@@ -38,12 +38,16 @@ void* gc_procedure(void* arg){
     void* stack_ptr = wargs->worker_stackaddr + wargs->stack_size;
     int iter = 0;
     while(wargs->is_working && wargs->run_GC){
-        GC(stack_ptr, wargs->worker_stackaddr);
         curr_heapsz = get_heap_size();
         if (curr_heapsz != prev_heapsz){
             printf("ALLOCED HEAP SIZE: %ld\n", curr_heapsz);
             prev_heapsz = curr_heapsz;
         }
+        if(curr_heapsz <= 0){
+            sleep_nanos(req);
+            continue;
+        }
+        GC(stack_ptr, wargs->worker_stackaddr);
         sleep_nanos(req);        
     }
     //GC(stack_ptr, wargs->worker_stackaddr);

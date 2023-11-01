@@ -24,7 +24,7 @@ void print_data (int virtual_address, int physical_address, int stored_value){
 
 int maingc (void){
     start_autoGC();
-
+    sleep(1);
     char* PHYSICAL_MEMORY;
     TBL_hit_count = 0;
     page_fault_count = 0;
