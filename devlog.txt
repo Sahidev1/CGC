@@ -1,0 +1,3 @@
+Wed Nov 1 08:40:02 PM CET 2023: all tests pass and sample program runs well and passes, after fixing GC so that it doesn't run when alloced heap size is zero, so far no tests that are supposed to not cause segfaults have caused segfaults
+
+
