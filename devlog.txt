@@ -1,3 +1,5 @@
 Wed Nov 1 08:40:02 PM CET 2023: all tests pass and sample program runs well and passes, after fixing GC so that it doesn't run when alloced heap size is zero, so far no tests that are supposed to not cause segfaults have caused segfaults
 
 
+Wed Nov 1 08:59:07 PM CET 2023: search_and_mark function is problematic, if a datastructure is deeply nested with references then the  search_and_mark recursive calls will overwhelm the callstack and overflow the stack frame, causing stack overflow error
+
