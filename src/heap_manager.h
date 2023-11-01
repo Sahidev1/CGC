@@ -31,6 +31,7 @@ int GC(void* stack_ptr, void* stack_end);
 int runGC ();
 
 void chunk_iterator ();
+int stack_iterator ();
 
 int set_stack_layout (void* stackptr, void* stackend);
 

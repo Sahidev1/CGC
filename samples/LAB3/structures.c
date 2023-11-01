@@ -110,7 +110,6 @@ void init_TBL(TBL *tbl_cache){
 int TBL_enqueue(TBL *tbl_cache, int pgnr, int frame_addr){
     if (tbl_cache->head == NULL){
         tbl_cache->head = alloc (sizeof(tnode));
-        printf ("made it here\n");
         tbl_cache->head->frame_address = frame_addr;
         tbl_cache->head->page_nummer = pgnr;
         tbl_cache->tail = tbl_cache->head;

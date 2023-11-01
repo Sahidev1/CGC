@@ -192,13 +192,31 @@ void chunk_iterator (){
     alloc_chunk* iter = first;
     int chunk_count=0;
     while(iter != NULL){
-        printf("chunck addr: %p\n", iter);
-        printf("data type: %d, get refstate: %d, get size: %d\n", (int) get_datatype(iter),
+        printf("chunck addr: %p, ", iter);
+        printf("data type: %d, get refstate: %d, get size: %d, ", (int) get_datatype(iter),
         (int) get_refstate(iter),(int) get_chunk_size(iter));
         printf("chunk_count: %d\n", ++chunk_count);
         iter = iter->next;
     }
 } 
+
+//for debugging
+int stack_iterator (){
+    if(STACK_LAYOUT_UNKNOWN) return 1;
+    void* stackptr = given_stack_ptr;
+    void* end = given_stack_end;
+    void* word;
+    int consecutive_nulls = 0;
+    while (stackptr > end){
+        word = (void*) (*((int64_t*)stackptr));
+        if (word == NULL) consecutive_nulls++;
+        else {
+            consecutive_nulls = 0;
+            printf("stack addr: %p , word: %p\n", stackptr, word);
+        }
+        stackptr -= 8;
+    }
+}
 
 /**
  * This function sweeps clean all unmarked(unreachable from the stack) chunks, freeing memory.
@@ -293,7 +311,10 @@ static int inner_GC_call(){
 }
 
 int runGC (){
-    return inner_GC_call();
+    if (stklay == STACK_LAYOUT_UNKNOWN) return 1;
+    GC(given_stack_ptr, given_stack_end);
+    alloc_buildup = 0;
+    return 0;
 }
 
 /**
