@@ -39,7 +39,7 @@ int maingc (void){
     list = alloc(sizeof(fifo));
     tbl_cache = alloc(sizeof(TBL));
 
-    fptr = fopen("/home/ali/Documents/projects/CGC/samples/LAB3/data/addresses.txt", READ_MODE);
+    fptr = fopen("samples/LAB3/data/addresses.txt", READ_MODE);
     if (fptr == NULL) {
         printf ("failed to open file, make sure path is correct!\n");
         return -1;
