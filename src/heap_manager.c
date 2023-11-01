@@ -104,9 +104,8 @@ static int set_signature(alloc_chunk* chnk){
 */
 static int heap_dealloc(alloc_chunk* chnk){
     //printf("dealloc addr: %p\n", chnk);
+    
     size_t chnksize = get_chunk_size(chnk);
-
-    pthread_mutex_lock(&heap_lock);
 
     alloc_chunk* prev = chnk->prev;
     alloc_chunk* next = chnk->next;
@@ -125,7 +124,6 @@ static int heap_dealloc(alloc_chunk* chnk){
     }
     free(chnk);
     heap_alloc_size -= (chnksize + ALLOC_OVERHEAD);
-    pthread_mutex_unlock(&heap_lock);
 
     return 0;
 }
@@ -234,6 +232,7 @@ int stack_iterator (){
  * This function sweeps clean all unmarked(unreachable from the stack) chunks, freeing memory.
 */
 static int sweep(){
+    pthread_mutex_lock(&heap_lock);
     alloc_chunk* iter = first;
     alloc_chunk* next;
     while(iter != NULL){
@@ -244,6 +243,7 @@ static int sweep(){
         }
         iter = next;
     }
+    pthread_mutex_unlock(&heap_lock);
     return 0;
 }
 
