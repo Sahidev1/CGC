@@ -2,6 +2,8 @@
 #include "CGC.h"
 #include "threadctrl.h"
 
+#include <stdio.h> // for debbugging.
+
 #define STACK_SIZE (256*4096) // About 1MB of stack space. 
 #define STACK_NOTUSED (0x0)
 #define SWITCH_INIT (0x0)
@@ -11,10 +13,13 @@ static pthread_t gc;
 
 int start_autoGC(){
     wargs->run_GC = TRUE;
-    return pthread_create(&gc, NULL, &gc_procedure, wargs);
+    int val = pthread_create(&gc, NULL, &gc_procedure, wargs);
+    //printf("PHTREAD CREATE , VAL: %d \n",val);
+    return val;
 }
 
 int stop_autoGC(){
+    printf("STOP reached");
     wargs->run_GC = FALSE;
     return pthread_detach(gc);
 }

@@ -28,14 +28,22 @@ void* worker_fun(void* arg){
  * this is a bit dodgy
 */
 void* gc_procedure(void* arg){
+    //printf("GC PROCEDURE\n");
     long sleep_time_nanos = 1000 * 100; // 100 ns
     struct timespec req={.tv_sec=0, .tv_nsec=sleep_time_nanos};
+    volatile size_t prev_heapsz = 0;
+    volatile size_t curr_heapsz = 0;
 
     shared_args *const wargs = (shared_args*) arg;
     void* stack_ptr = wargs->worker_stackaddr + wargs->stack_size;
     int iter = 0;
     while(wargs->is_working && wargs->run_GC){
         GC(stack_ptr, wargs->worker_stackaddr);
+        curr_heapsz = get_heap_size();
+        if (curr_heapsz != prev_heapsz){
+            printf("ALLOCED HEAP SIZE: %ld\n", curr_heapsz);
+            prev_heapsz = curr_heapsz;
+        }
         sleep_nanos(req);        
     }
     //GC(stack_ptr, wargs->worker_stackaddr);

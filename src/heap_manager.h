@@ -33,6 +33,8 @@ int runGC ();
 void chunk_iterator ();
 int stack_iterator ();
 
+volatile size_t get_heap_size();
+
 int set_stack_layout (void* stackptr, void* stackend);
 
 #endif

@@ -4,6 +4,8 @@
 
 //test passed if segfault.
 int gc_main(void){
+    start_autoGC();
+
     sleep(1);
     // errounously allocating space for REFERENCES/pointers AS VALUE datatype
     int64_t** ptr_ptr = palloc(sizeof(int64_t*)*5, VALUE);
@@ -38,7 +40,7 @@ int gc_main(void){
     printf("UNREFERENCED PTR\n");
     sleep(5);
 
-
+    stop_autoGC();
 
 
     return 0;

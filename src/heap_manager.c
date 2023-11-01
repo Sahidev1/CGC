@@ -22,10 +22,15 @@ static stacklayout stklay = STACK_LAYOUT_UNKNOWN;
 static void* given_stack_ptr; 
 static void* given_stack_end;
 
-static size_t alloc_buildup = 0;
+static volatile size_t heap_alloc_size = 0;
+static volatile size_t alloc_buildup = 0;
 
 static int flip_marker(int marker){
     return (~marker)&(0x1);
+}
+
+volatile size_t get_heap_size(){
+    return heap_alloc_size;
 }
 
 /**
@@ -99,6 +104,7 @@ static int set_signature(alloc_chunk* chnk){
 */
 static int heap_dealloc(alloc_chunk* chnk){
     //printf("dealloc addr: %p\n", chnk);
+    size_t chnksize = get_chunk_size(chnk);
 
     pthread_mutex_lock(&heap_lock);
 
@@ -118,6 +124,7 @@ static int heap_dealloc(alloc_chunk* chnk){
         next->prev = prev;
     }
     free(chnk);
+    heap_alloc_size -= (chnksize + ALLOC_OVERHEAD);
     pthread_mutex_unlock(&heap_lock);
 
     return 0;
@@ -277,6 +284,7 @@ static void* heap_alloc(size_t size, datatype type){
     int padding = 8 - (size%8);
     padding = padding == 8?0:padding;
     void* heap_chunk = calloc(1,size + ALLOC_OVERHEAD + padding);
+    heap_alloc_size += size + ALLOC_OVERHEAD;
     alloc_chunk* chnk = (alloc_chunk*) heap_chunk;
     set_chunk_size(chnk, size);
     set_datatype(chnk, type);

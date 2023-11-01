@@ -23,6 +23,7 @@ void print_data (int virtual_address, int physical_address, int stored_value){
 }
 
 int maingc (void){
+    sleep(1);
     start_autoGC();
 
     char* PHYSICAL_MEMORY;
@@ -48,8 +49,13 @@ int maingc (void){
 
     init_page_table(&pt);
     init_freelist(list);
+
+    sleep(1);    
     open_disk(&disc);
     init_TBL(tbl_cache);
+
+
+    sleep(1);
 
     read_buffer = alloc(sizeof(char) * READ_BUFFER_SIZE);
     size_t size = (size_t) READ_BUFFER_SIZE;
@@ -57,8 +63,8 @@ int maingc (void){
     int base_address;
     int physical_address;
     char stored_value; 
-
-    chunk_iterator();
+    sleep(1);
+    //chunk_iterator();
     print_debug("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
     while (getline(&read_buffer, &size, fptr) != -1){
@@ -91,15 +97,21 @@ int maingc (void){
         //print_data(virtual_address, physical_address, stored_value);
     }
 
+    sleep(1);
+
     printf("Page fault count: %d, TBL Hitrate: %d\n", page_fault_count, TBL_hit_count);
-    chunk_iterator();
+    //chunk_iterator();
     list = NULL;
-    chunk_iterator();
+    sleep(1);
+    //chunk_iterator();
     tbl_cache= NULL;
+    sleep(1);
     PHYSICAL_MEMORY = NULL;
-    chunk_iterator();
+    //chunk_iterator();
     read_buffer=NULL;
+    sleep(1);
     stop_autoGC();
+    //chunk_iterator();
     return 0;
 }
 

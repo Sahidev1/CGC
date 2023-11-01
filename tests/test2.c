@@ -14,7 +14,7 @@ int gcmain(void){
     sleep(10);
     int alloc_size = 1000*1000*400;
 
-    int* iptr0 = palloc(sizeof(int)*alloc_size, VALUE);
+    int* iptr0 = GC_palloc(sizeof(int)*alloc_size, VALUE);
     for(int i = 0; i < alloc_size; i++){
         iptr0[i] = 11;
     }
@@ -22,13 +22,12 @@ int gcmain(void){
     iptr0 = NULL;
     prnt("iptr0 derefed");
     sleep(5);
-    int* iptr1 = palloc(sizeof(int)*alloc_size/100, VALUE);
+    int* iptr1 = GC_palloc(sizeof(int)*alloc_size/100, VALUE);
     for(int i = 0; i < alloc_size/100; i++){
         iptr1[i] = 11;
     }
     prnt("new allloc");
     sleep(5);
-
     return 0;
 }
 

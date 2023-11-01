@@ -1,0 +1,1 @@
+gcc -lpthread -Isrc samples/LAB3/lab3.c samples/LAB3/structures.c src/heap_manager.c src/CGC.c src/threadctrl.c
