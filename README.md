@@ -1,4 +1,4 @@
 # CGC
-C-garbage collector for linux
+A C mark and sweep garbage collector for linux using pthreads.
 
 Work in progress. 
