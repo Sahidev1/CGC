@@ -28,7 +28,6 @@ void* worker_fun(void* arg){
  * this is a bit dodgy
 */
 void* gc_procedure(void* arg){
-    //printf("GC PROCEDURE\n");
     long sleep_time_nanos = 1000 * 100; // 100 ns
     struct timespec req={.tv_sec=0, .tv_nsec=sleep_time_nanos};
     volatile size_t prev_heapsz = 0;
@@ -40,7 +39,7 @@ void* gc_procedure(void* arg){
     while(wargs->is_working && wargs->run_GC){
         curr_heapsz = get_heap_size();
         if (curr_heapsz != prev_heapsz){
-            printf("ALLOCED HEAP SIZE: %ld\n", curr_heapsz);
+            //printf("ALLOCED HEAP SIZE: %ld\n", curr_heapsz);
             prev_heapsz = curr_heapsz;
         }
         if(curr_heapsz <= 0){
@@ -50,7 +49,5 @@ void* gc_procedure(void* arg){
         GC(stack_ptr, wargs->worker_stackaddr);
         sleep_nanos(req);        
     }
-    //GC(stack_ptr, wargs->worker_stackaddr);
-    printf("GC Done\n");
     return NULL;
 }

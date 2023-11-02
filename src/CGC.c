@@ -11,6 +11,9 @@
 static shared_args* wargs;
 static pthread_t gc;
 
+/**
+ * Creates the GC thread
+*/
 int start_autoGC(){
     wargs->run_GC = TRUE;
     int val = pthread_create(&gc, NULL, &gc_procedure, wargs);
@@ -18,8 +21,11 @@ int start_autoGC(){
     return val;
 }
 
+/**
+ * Detaches the GC thread, making sure the thread gets cleaned up by the system
+ * after it finishes
+*/
 int stop_autoGC(){
-    printf("STOP reached");
     wargs->run_GC = FALSE;
     return pthread_detach(gc);
 }

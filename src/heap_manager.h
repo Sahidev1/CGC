@@ -30,6 +30,7 @@ void destroy_locks();
 int GC(void* stack_ptr, void* stack_end);
 int runGC ();
 
+/* Debugging functions*/
 void chunk_iterator ();
 int stack_iterator ();
 
