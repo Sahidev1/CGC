@@ -8,16 +8,23 @@ A worker thread is used to run a program and a garbage collector thread is used 
 Example program:
 
 ```
-#include "CGC.h"
+#include "CGC.h" // The include header for the garbage collector functions
 
 // This should be treated like how normal main function is used in C programs, put program code here.
 int worker_main(void){
   start_autoGC(); //This starts running a garbage collector thread
 
+  int arr_size = 100000;
+
+//Below is the memory allocator which allocates heap space which is garbage collected.
+  int* integer_arr = alloc(sizeof(int) * arr_size);
+
+
   // your program code that will be garabge collected
 
   stop_autoGC(); // this stops and cleans up the garbage collector thread, this should be called to avoid zombie threads
 
+  return 0;
 }
 
 int main(){
