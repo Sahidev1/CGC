@@ -44,7 +44,5 @@ gcc -lpthread -Isrc myprogram.c src/heap_manager.c src/CGC.c src/thread_procedur
 ```
 
 
-```
-gcc -lpthread -Isrc myprogram.c src/heap_manager.c src/CGC.c src/thread_procedures.c
 
-```
+
