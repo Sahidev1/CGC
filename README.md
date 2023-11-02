@@ -37,3 +37,9 @@ int main(){
 }
 ```
 
+How to compile your program from the root of CGC directory:
+
+```
+gcc -lpthread -Isrc myprogram.c src/heap_manager.c src/CGC.c src/thread_procedures.c
+
+```
