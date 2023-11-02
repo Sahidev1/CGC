@@ -1,5 +1,5 @@
-#ifndef THREADCTRL_H
-#define THREADCTRL_H
+#ifndef THREAD_PROCEDURES_H
+#define THREAD_PROCEDURES_H
 
 #include <stdlib.h>
 #include <time.h>

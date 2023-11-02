@@ -1,6 +1,6 @@
 
 #include "CGC.h"
-#include "threadctrl.h"
+#include "thread_procedures.h"
 
 #include <stdio.h> // for debbugging.
 

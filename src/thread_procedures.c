@@ -1,4 +1,4 @@
-#include "threadctrl.h"
+#include "thread_procedures.h"
 #include "shared_struct.h"
 
 #include <stdio.h> // for debugging
